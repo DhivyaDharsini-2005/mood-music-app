@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoodTunes – Camera-Based Music Recommender</title>
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!--
+    face-api.js  –  Face detection + expression recognition.
+    CDN: unpkg (stable, no install needed).
+    Docs: https://github.com/justadudewhohacks/face-api.js
+  -->
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+  <!-- Our data and logic files -->
+  <script defer src="songs.js"></script>
+  <script defer src="script.js"></script>
+</head>
+
+<body>
+  <div class="app-wrapper">
+
+    <!-- ── Header ─────────────────────────────────────────── -->
+    <header>
+      <div class="logo">
+        <span class="logo-icon">🎵</span>
+        MoodTunes
+      </div>
+      <p>Your face decides the playlist. Powered by real-time AI emotion detection.</p>
+    </header>
+
+    <!-- ── Status bar ─────────────────────────────────────── -->
+    <div class="status loading" id="status">⏳ Initialising…</div>
+
+    <!-- ── Main two-column grid ───────────────────────────── -->
+    <div class="main-grid">
+
+      <!-- Left: Camera feed -->
+      <div class="camera-panel">
+        <div class="panel-header">
+          <span class="panel-title">📷 Live Camera</span>
+          <span class="live-dot" id="liveDot">LIVE</span>
+        </div>
+
+        <div class="video-container" id="videoContainer">
+          <!-- Placeholder shown when camera is off -->
+          <div class="video-placeholder">
+            <div class="cam-icon">📷</div>
+            <p>Camera is off</p>
+          </div>
+
+          <!-- Live webcam stream -->
+          <video id="webcam" autoplay muted playsinline></video>
+
+          <!-- Canvas overlaid on top for drawing boxes -->
+          <canvas id="overlay"></canvas>
+        </div>
+
+        <!-- Buttons -->
+        <div class="camera-footer">
+          <button class="btn btn-primary" id="startBtn" disabled>
+            ▶ Start Detection
+          </button>
+          <button class="btn btn-secondary hidden" id="stopBtn">
+            ⏹ Stop
+          </button>
+          <!-- Spinner shown during model load -->
+          <div id="loader"></div>
+        </div>
+      </div>
+
+      <!-- Right: Emotion + Song results -->
+      <div class="results-panel" id="resultsPanel">
+
+        <!-- Detected emotion display -->
+        <div class="emotion-display">
+          <span class="emotion-emoji" id="emotionEmoji">🙈</span>
+          <div class="emotion-text">
+            <div class="emotion-label" id="emotionLabel">Waiting…</div>
+            <div class="emotion-sub">Detected emotion</div>
+          </div>
+        </div>
+
+        <!-- Songs header -->
+        <div class="songs-header">
+          <span>Recommended for your mood</span>
+        </div>
+
+        <!-- Dynamically filled song list -->
+        <ul id="songList"></ul>
+
+      </div>
+
+    </div><!-- /.main-grid -->
+
+    <!-- ── Footer ─────────────────────────────────────────── -->
+    <footer>
+      <p>
+        Emotion detection by
+        <a href="https://github.com/justadudewhohacks/face-api.js" target="_blank">face-api.js</a>
+        &nbsp;·&nbsp; Models loaded from <code>/models</code>
+      </p>
+      <p style="margin-top:.3rem">
+        No video data is sent to any server — everything runs locally in your browser.
+      </p>
+    </footer>
+
+  </div><!-- /.app-wrapper -->
+</body>
+</html>

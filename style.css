@@ -1,0 +1,482 @@
+/* ============================================================
+   style.css  –  Mood Detection Music Recommender
+   Theme: Dark Cinematic  |  Fonts: Bebas Neue + Space Grotesk
+   ============================================================ */
+
+/* ── Google Fonts ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+/* ── CSS Variables ────────────────────────────────────────── */
+:root {
+  --bg-base:    #0a0a0f;
+  --bg-surface: #12121a;
+  --bg-card:    #1a1a26;
+  --border:     rgba(255,255,255,.07);
+  --text-primary: #e8e8f0;
+  --text-muted:   #6b6b80;
+  --accent:     #c084fc;        /* violet */
+  --accent-alt: #818cf8;        /* indigo */
+  --glow:       rgba(192,132,252,.35);
+  --radius:     14px;
+  --transition: .3s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+
+  /* Subtle grain overlay */
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(129,140,248,.12) 0%, transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+}
+
+/* ── Layout ───────────────────────────────────────────────── */
+.app-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  letter-spacing: .06em;
+  background: linear-gradient(135deg, #c084fc 0%, #818cf8 50%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logo-icon { font-size: 1.1em; filter: drop-shadow(0 0 12px #c084fc); }
+
+header p {
+  color: var(--text-muted);
+  font-size: .95rem;
+  font-weight: 300;
+  margin-top: .4rem;
+  letter-spacing: .02em;
+}
+
+/* ── Status Bar ───────────────────────────────────────────── */
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .7rem 1.4rem;
+  border-radius: 100px;
+  font-size: .88rem;
+  font-weight: 500;
+  letter-spacing: .01em;
+  margin: 0 auto 2rem;
+  max-width: 560px;
+  border: 1px solid var(--border);
+  transition: background var(--transition), color var(--transition);
+}
+
+.status.loading  { background: rgba(251,191,36,.08);  color: #fbbf24; border-color: rgba(251,191,36,.2); }
+.status.ready    { background: rgba(52,211,153,.08);  color: #34d399; border-color: rgba(52,211,153,.2); }
+.status.active   { background: rgba(192,132,252,.1);  color: #c084fc; border-color: rgba(192,132,252,.25); }
+.status.warn     { background: rgba(251,146,60,.08);  color: #fb923c; border-color: rgba(251,146,60,.2); }
+.status.error    { background: rgba(248,113,113,.08); color: #f87171; border-color: rgba(248,113,113,.2); }
+
+/* ── Main Grid ────────────────────────────────────────────── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .main-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Camera Panel ─────────────────────────────────────────── */
+.camera-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: .08em;
+  color: var(--text-primary);
+}
+
+.live-dot {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.live-dot::before {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: background .3s;
+}
+
+.live-dot.active::before {
+  background: #4ade80;
+  box-shadow: 0 0 8px #4ade80;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .4; }
+}
+
+/* Video container + canvas overlay */
+.video-container {
+  position: relative;
+  background: #05050a;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+
+#webcam {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scaleX(-1);   /* mirror so it feels natural */
+}
+
+#overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(-1);   /* mirror matches video */
+  pointer-events: none;
+}
+
+/* Placeholder when camera is off */
+.video-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .8rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: opacity .3s;
+}
+
+.video-placeholder .cam-icon { font-size: 3rem; opacity: .3; }
+.video-placeholder p { font-size: .85rem; opacity: .5; }
+
+/* Hide placeholder when video is streaming */
+.video-container.streaming .video-placeholder { opacity: 0; }
+
+/* Camera footer / buttons */
+.camera-footer {
+  padding: 1rem 1.25rem;
+  display: flex;
+  gap: .75rem;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .65rem 1.4rem;
+  border-radius: 100px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: transform var(--transition), box-shadow var(--transition), opacity .2s;
+}
+
+.btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #c084fc, #818cf8);
+  color: #fff;
+  box-shadow: 0 0 0 rgba(192,132,252,0);
+}
+
+.btn-primary:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(192,132,252,.45);
+}
+
+.btn-secondary {
+  background: rgba(248,113,113,.1);
+  color: #f87171;
+  border: 1px solid rgba(248,113,113,.25);
+}
+
+.btn-secondary:hover {
+  background: rgba(248,113,113,.18);
+  transform: translateY(-2px);
+}
+
+.hidden { display: none !important; }
+
+/* ── Results Panel ────────────────────────────────────────── */
+.results-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .5s, transform .5s;
+  pointer-events: none;
+}
+
+.results-panel.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Emotion display */
+.emotion-display {
+  padding: 1.5rem 1.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.emotion-emoji {
+  font-size: 3.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 14px rgba(255,255,255,.2));
+  animation: emojiPop .4s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes emojiPop {
+  from { transform: scale(.5); opacity: 0; }
+  to   { transform: scale(1);  opacity: 1; }
+}
+
+.emotion-text {}
+
+.emotion-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: .06em;
+  line-height: 1;
+  transition: color .5s;
+}
+
+.emotion-sub {
+  font-size: .78rem;
+  color: var(--text-muted);
+  margin-top: .15rem;
+  font-weight: 400;
+}
+
+/* Songs list */
+.songs-header {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: 1rem 1.5rem .75rem;
+  font-size: .78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.songs-header span { flex: 1; }
+.songs-header::before { content: '🎵'; }
+
+#songList {
+  list-style: none;
+  overflow-y: auto;
+  max-height: 320px;
+  padding: .5rem 0;
+}
+
+#songList::-webkit-scrollbar { width: 4px; }
+#songList::-webkit-scrollbar-track { background: transparent; }
+#songList::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Song card */
+.song-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .7rem 1.5rem;
+  border-radius: 8px;
+  transition: background var(--transition);
+  animation: slideIn .35s ease both;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-10px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+.song-card:hover {
+  background: rgba(255,255,255,.04);
+  cursor: default;
+}
+
+.song-num {
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: .05em;
+  min-width: 22px;
+}
+
+.song-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+  min-width: 0;
+}
+
+.song-title {
+  font-size: .9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-artist {
+  font-size: .78rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Mood tags */
+.song-tag {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: .2rem .5rem;
+  border-radius: 100px;
+  border: 1px solid;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.song-tag.upbeat    { color: #fbbf24; border-color: rgba(251,191,36,.3);  background: rgba(251,191,36,.08); }
+.song-tag.melancholy{ color: #93c5fd; border-color: rgba(147,197,253,.3); background: rgba(147,197,253,.08); }
+.song-tag.aggressive{ color: #f87171; border-color: rgba(248,113,113,.3); background: rgba(248,113,113,.08); }
+.song-tag.chill     { color: #c084fc; border-color: rgba(192,132,252,.3); background: rgba(192,132,252,.08); }
+.song-tag.electric  { color: #f472b6; border-color: rgba(244,114,182,.3); background: rgba(244,114,182,.08); }
+.song-tag.haunting  { color: #67e8f9; border-color: rgba(103,232,249,.3); background: rgba(103,232,249,.08); }
+.song-tag.dark      { color: #a78bfa; border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.08); }
+
+/* Song actions wrapper */
+.song-actions {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-shrink: 0;
+}
+
+/* YouTube play button */
+.play-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 0, 0, 0.15);
+  color: #ff4444;
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  text-decoration: none;
+  font-size: .75rem;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  flex-shrink: 0;
+}
+
+.play-btn:hover {
+  background: rgba(255, 0, 0, 0.85);
+  color: #fff;
+  transform: scale(1.15);
+  box-shadow: 0 0 14px rgba(255, 0, 0, 0.5);
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  margin-top: 3.5rem;
+  color: var(--text-muted);
+  font-size: .78rem;
+  line-height: 1.8;
+}
+
+footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+footer a:hover { text-decoration: underline; }
+
+/* ── Loader Spinner ───────────────────────────────────────── */
+#loader {
+  display: none;
+  width: 20px; height: 20px;
+  border: 2px solid rgba(192,132,252,.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
